@@ -20,5 +20,4 @@ from WebScraper import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('WebScraper.urls')),
-    path('jet/', include('jet.urls', 'jet')),
 ]
