@@ -11,3 +11,5 @@ install:
 # command to run tests
 script:
   - cd scamdetector && python manage.py test
+os:
+  - linux
