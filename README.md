@@ -5,11 +5,12 @@
 Detect scam ads on Craigslist
 
 ## Requirements
-
+```
   Python 3.6 or later
-
+```
 ## Setup Instructions
-```$pip install --upgrade pip
+```
+$pip install --upgrade pip
 $pip install virtualenv
 $virtualenv env
 $source env/bin/activate [Linux]
@@ -17,6 +18,7 @@ $env/Scripts/activate [Windows]
 $pip install -r requirements.txt
 ```
 ## Run
-```$cd scamdetector
+```
+$cd scamdetector
 $python manage.py runserver
 ```
