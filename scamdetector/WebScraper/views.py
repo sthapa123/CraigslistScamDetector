@@ -16,13 +16,14 @@ BASE_QUERY = 'https://minneapolis.craigslist.org/search/sss?query={}&sort=rel'
 min_price_query = '&min_price={}'
 max_price_query = '&max_price={}'
 Image_URL = 'https://images.craigslist.org/{}_300x300.jpg'
+
 # Create your views here.
 def home(request):
-    return render(request , 'base.html')
+    return render(request , 'home.html')
 
 def new_search(request):
     #Get search object
-    Search_text = request.POST.get('search')
+    Search_text = request.POST.get('search_url')
     min_text = request.POST.get('min_price')
     max_text = request.POST.get('max_price')
     
@@ -33,26 +34,33 @@ def new_search(request):
     #save searchs in the table
     models.Search.objects.create(search = Search_text)
     #Format Query
-    final_url =  BASE_QUERY.format(quote_plus(Search_text))
+    #final_url =  BASE_QUERY.format(quote_plus(Search_text))
+    final_url = Search_text
+    '''
     if min_text != '' and max_text != '':
         final_url = final_url + min_price_query.format(min_text) + max_price_query.format(max_text)
     elif (min_text != '' and max_text == ''):
         final_url = final_url + min_price_query.format(min_text)
     elif (min_text == '' and max_text != ''):
         final_url = final_url + max_price_query.format(max_text)
-
+    '''
     print(final_url)
     #Excute the query
-    response = requests.get(final_url, verify=False)
+    headers = {
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+    }
+    response = requests.get(final_url, verify=False, headers=headers)
     #Reponse from query
     data = response.text
     #Clean up the results using beautiful soup
     soup = BeautifulSoup(data, features='html.parser')
-    post_lists = soup.find_all( 'li',{'class' : 'result-row'})
-   
+    #post_lists = soup.find_all( 'li',{'class' : 'result-row'})
+    post_title = soup.find(class_ = "postingtitletext")
+    print(post_title + "dsf")
     final_posts =[]
     numberofsearches = 0
-    for post in post_lists:
+    '''for post in post_lists:
+        print(post)
         post_title = post.find(class_  ='result-title hdrlnk').text
         post_link  = post.find('a').get('href')
 
@@ -67,7 +75,8 @@ def new_search(request):
             post_image = 'https://image.shutterstock.com/image-vector/no-image-available-icon-vector-260nw-1323742826.jpg'
         final_posts.append((post_title, post_link, post_cost,post_image ))
         numberofsearches+=1
-
+    '''
+    
     print(numberofsearches)
     search_dictionary ={
         'search' : Search_text,
