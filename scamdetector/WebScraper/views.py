@@ -19,23 +19,21 @@ Image_URL = 'https://images.craigslist.org/{}_300x300.jpg'
 
 # Create your views here.
 def home(request):
-    return render(request , 'home.html')
+    return render(request , 'WebScraper/index.html')
 
 def new_search(request):
     #Get search object
-    Search_text = request.POST.get('search_url')
-    min_text = request.POST.get('min_price')
-    max_text = request.POST.get('max_price')
+    search_url = request.POST.get('search_url')
     
     #Check is text is null or not
-    if Search_text == None:
-        Search_text = ''
+    if search_url == None:
+        search_url = ''
 
     #save searchs in the table
-    models.Search.objects.create(search = Search_text)
+    models.Search.objects.create(search = search_url)
     #Format Query
     #final_url =  BASE_QUERY.format(quote_plus(Search_text))
-    final_url = Search_text
+    final_url = search_url
     '''
     if min_text != '' and max_text != '':
         final_url = final_url + min_price_query.format(min_text) + max_price_query.format(max_text)
@@ -55,10 +53,36 @@ def new_search(request):
     #Clean up the results using beautiful soup
     soup = BeautifulSoup(data, features='html.parser')
     #post_lists = soup.find_all( 'li',{'class' : 'result-row'})
-    post_title = soup.find(class_ = "postingtitletext")
-    print(post_title + "dsf")
-    final_posts =[]
-    numberofsearches = 0
+    #post_title = soup.find(class_ = "postingtitletext").text
+    post_full_title = soup.find(class_ = "postingtitletext").text
+    print(post_full_title)
+
+    if soup.find(class_ = "price"):
+        post_price = soup.find(class_ = "price").text
+    else:
+        post_price = "N/A"
+
+    # if soup.find(class_ = "first").get('data-imgid'):
+    #     first_img_id = soup.find(class_ = "first").get('data-imgid').text
+    #     img_src = soup.find("data-imgid"=first_img_id).text
+    #     print(img_src)
+    # else:
+    #     first_img_id = ''
+
+    for post in soup.find_all('div', "swipe-wrap"):
+        for post_content in post.find_all('div', "slide"):
+            for pic in post_content.find_all("img"):
+                print(pic['src'])
+                first_img_url = pic['src']
+                print(first_img_url)
+
+    for img in soup.find_all('div', id="thumbs"):
+        for img_content in img.find_all("img"):
+            post_image = Image_URL.format(img_content['src'])
+    print(post_price)
+    #post_image_URL = soup.find(class_ = 'result-image').get('data-ids').split(',')[0].split(':')[1]
+
+    #print(post_image_URL.text)
     '''for post in post_lists:
         print(post)
         post_title = post.find(class_  ='result-title hdrlnk').text
@@ -77,13 +101,13 @@ def new_search(request):
         numberofsearches+=1
     '''
     
-    print(numberofsearches)
     search_dictionary ={
-        'search' : Search_text,
-         'final_posts' : final_posts,
-         'numberofsearches' : numberofsearches ,
+        'search' : final_url,
+        'post_full_title': post_full_title,
+        'post_price': post_price,
+        'first_img_url': first_img_url
     }
-    return render(request , 'WebScraper/new_search.html',search_dictionary)
+    return render(request , 'WebScraper/results.html',search_dictionary)
 
 def run_quickstart():
     # [START vision_quickstart] 
