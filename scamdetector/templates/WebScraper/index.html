@@ -1,5 +1,6 @@
 {% extends 'base.html'%}
 {% block content%}
+{% load static %}
 <div id="search_container_2">
     <div id="search_2">
         <div class="app_title">
@@ -13,7 +14,7 @@
                     <div class="row no-gutters custom-search-input-2">
                         <div class="col-lg-10">
                             <div class="form-group">
-                                <input class="form-control" type="text" placeholder="Put your Craigslist ad URL here..." id="autocomplete" name="search_url">
+                                <input class="form-control" type="text" placeholder="Put your Craigslist ad URL here..." id="autocomplete" name="search_url" required>
                                 <i class="icon_link"></i>
                             </div>
                         </div>

@@ -6,16 +6,16 @@ from . import models
 import io
 import os
 import argparse
-
+import asyncio
+import urllib.request
 # Imports the Google Cloud client library
 # [START vision_python_migration_import]
 from google.cloud import vision
 from google.cloud.vision import types
+from google.cloud import storage
 # [END vision_python_migration_import]
-BASE_QUERY = 'https://minneapolis.craigslist.org/search/sss?query={}&sort=rel'
-min_price_query = '&min_price={}'
-max_price_query = '&max_price={}'
-Image_URL = 'https://images.craigslist.org/{}_300x300.jpg'
+
+GS_BUCKET_NAME = "craigslist-images-bucket"
 
 # Create your views here.
 def home(request):
@@ -34,14 +34,6 @@ def new_search(request):
     #Format Query
     #final_url =  BASE_QUERY.format(quote_plus(Search_text))
     final_url = search_url
-    '''
-    if min_text != '' and max_text != '':
-        final_url = final_url + min_price_query.format(min_text) + max_price_query.format(max_text)
-    elif (min_text != '' and max_text == ''):
-        final_url = final_url + min_price_query.format(min_text)
-    elif (min_text == '' and max_text != ''):
-        final_url = final_url + max_price_query.format(max_text)
-    '''
     print(final_url)
     #Excute the query
     headers = {
@@ -62,50 +54,32 @@ def new_search(request):
     else:
         post_price = "N/A"
 
-    # if soup.find(class_ = "first").get('data-imgid'):
-    #     first_img_id = soup.find(class_ = "first").get('data-imgid').text
-    #     img_src = soup.find("data-imgid"=first_img_id).text
-    #     print(img_src)
-    # else:
-    #     first_img_id = ''
-
     for post in soup.find_all('div', "swipe-wrap"):
         for post_content in post.find_all('div', "slide"):
             for pic in post_content.find_all("img"):
-                print(pic['src'])
                 first_img_url = pic['src']
-                print(first_img_url)
+                #print(first_img_url)
 
+    # Get all the images from the craigslist ad
+    post_image = []
     for img in soup.find_all('div', id="thumbs"):
-        for img_content in img.find_all("img"):
-            post_image = Image_URL.format(img_content['src'])
-    print(post_price)
-    #post_image_URL = soup.find(class_ = 'result-image').get('data-ids').split(',')[0].split(':')[1]
-
-    #print(post_image_URL.text)
-    '''for post in post_lists:
-        print(post)
-        post_title = post.find(class_  ='result-title hdrlnk').text
-        post_link  = post.find('a').get('href')
-
-        if post.find(class_  = 'result-price'):
-            post_cost  = post.find(class_  = 'result-price').text
-        else:
-            post_cost = 'NA'
-        if post.find(class_ = 'result-image').get('data-ids'):
-            post_image_URL = post.find(class_ = 'result-image').get('data-ids').split(',')[0].split(':')[1]
-            post_image = Image_URL.format(post_image_URL)
-        else:
-            post_image = 'https://image.shutterstock.com/image-vector/no-image-available-icon-vector-260nw-1323742826.jpg'
-        final_posts.append((post_title, post_link, post_cost,post_image ))
-        numberofsearches+=1
-    '''
+        for img_content in img.find_all("a", "thumb"):
+            post_image.append(img_content['href'])
+    
+    # Upload all the images to google cloud storage
+    for image in post_image:
+        print("Uploading images to google cloud storage .....")
+        gcs_path = upload_blob(image)
+        print("Sending request to google cloud api .....")
+        report(annotate("gs://{}/{}".format(GS_BUCKET_NAME, gcs_path)))
     
     search_dictionary ={
         'search' : final_url,
         'post_full_title': post_full_title,
         'post_price': post_price,
-        'first_img_url': first_img_url
+        'first_img_url': first_img_url,
+        'post_image' : post_image,
+        #'annotation_results' : annotation_results
     }
     return render(request , 'WebScraper/results.html',search_dictionary)
 
@@ -135,12 +109,11 @@ def run_quickstart():
         print(label.description)
         print(label.score)
     # [END vision_quickstart]
-run_quickstart()
+#run_quickstart()
 
 # [START vision_web_detection_gcs]
 def detect_web_uri(uri):
     """Detects web annotations in the file located in Google Cloud Storage."""
-    from google.cloud import vision
     client = vision.ImageAnnotatorClient()
     image = vision.types.Image()
     image.source.image_uri = uri
@@ -194,39 +167,24 @@ def detect_web_uri(uri):
             'https://cloud.google.com/apis/design/errors'.format(
                 response.error.message))
 # [END vision_web_detection_gcs]
-#detect_web_uri("gs://cloud-samples-data/vision/web/carnaval.jpeg")
-#detect_web_uri("gs://cloud-samples-data/vision/label/setagaya.jpeg")
-
-# [START vision_web_detection_tutorial]
-# [START vision_web_detection_tutorial_imports]
-import argparse
-import io
-
-from google.cloud import vision
-from google.cloud.vision import types
-# [END vision_web_detection_tutorial_imports]
-
 
 def annotate(path):
     """Returns web annotations given the path to an image."""
     # [START vision_web_detection_tutorial_annotate]
     client = vision.ImageAnnotatorClient()
-
-    if path.startswith('http') or path.startswith('gs:'):
+    print(path)
+    if path.startswith('http') or path.startswith('gs:') or path.startswith('https'):
         image = types.Image()
         image.source.image_uri = path
-
     else:
         with io.open(path, 'rb') as image_file:
             content = image_file.read()
 
         image = types.Image(content=content)
-
     web_detection = client.web_detection(image=image).web_detection
     # [END vision_web_detection_tutorial_annotate]
 
     return web_detection
-
 
 def report(annotations):
     """Prints detected features in the provided web annotations."""
@@ -261,16 +219,15 @@ def report(annotations):
             print('Description: {}'.format(entity.description))
     # [END vision_web_detection_tutorial_print_annotations]
 
+# Retrieved from https://stackoverflow.com/questions/54235721/transfer-file-from-url-to-cloud-storage
+def upload_blob(source_file_name):   
+    file = urllib.request.urlopen(source_file_name)
+    firstpos=source_file_name.rfind("/")
+    lastpos=len(source_file_name)
+    destination_blob_name = source_file_name[firstpos+1:lastpos]
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(GS_BUCKET_NAME)
+    blob = bucket.blob(destination_blob_name)
 
-# if __name__ == '__main__':
-#     # [START vision_web_detection_tutorial_run_application]
-#     parser = argparse.ArgumentParser(
-#         description=__doc__,
-#         formatter_class=argparse.RawDescriptionHelpFormatter)
-#     path_help = str('The image to detect, can be web URI, '
-#                     'Google Cloud Storage, or path to local file.')
-#     parser.add_argument('image_url', help=path_help)
-#     args = parser.parse_args()
-report(annotate("http://www.photos-public-domain.com/wp-content/uploads/2011/01/old-vw-bug-and-van.jpg"))
-    # [END vision_web_detection_tutorial_run_application]
-# [END vision_web_detection_tutorial]
+    blob.upload_from_string(file.read(), content_type='image/jpg')
+    return destination_blob_name

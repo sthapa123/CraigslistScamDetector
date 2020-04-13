@@ -42,19 +42,19 @@
             <div class="row">
                 <div class="col-3">
                     <div id="logo_home">
-                    	<h1><a href="index.html" title="City tours travel template">City Tours travel template</a></h1>
+                    	<h1><a href="{% url 'index' %}" title="Craigslist Scam Detection">Craigslist Scam Detection</a></h1>
                     </div>
                 </div>
                 <nav class="col-9">
                     <a class="cmn-toggle-switch cmn-toggle-switch__htx open_close" href="javascript:void(0);"><span>Menu mobile</span></a>
                     <div class="main-menu">
-                        <div id="header_menu">
-                            <img src="#" width="160" height="34" alt="Craigslist" data-retina="true">
-                        </div>
+                        <!-- <div id="header_menu">
+                            <img src="../img/logo.png" width="160" height="34" alt="Craigslist" data-retina="true">
+                        </div> -->
                         <a href="#" class="open_close" id="close_in"><i class="icon_set_1_icon-77"></i></a>
                          <ul>
                             <li class="submenu">
-                                <a href="#" class="show-submenu">Home</a>
+                                <a href="{% url 'index' %}" class="show-submenu">Home</a>
                             </li>
                             <li class="submenu">
                                 <a href="javascript:void(0);" class="show-submenu">Tours</a>
@@ -216,9 +216,6 @@
 		</div>
 		<form>
 			<div class="sign-in-wrapper">
-				<a href="#0" class="social_bt facebook">Login with Facebook</a>
-				<a href="#0" class="social_bt google">Login with Google</a>
-				<div class="divider"><span>Or</span></div>
 				<div class="form-group">
 					<label>Email</label>
 					<input type="email" class="form-control" name="email" id="email">
