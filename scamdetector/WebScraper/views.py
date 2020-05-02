@@ -19,38 +19,38 @@ GS_BUCKET_NAME = "craigslist-images-bucket"
 
 # Create your views here.
 def home(request):
-    return render(request , 'WebScraper/index.html')
+    return render(request, 'WebScraper/index.html')
 
 def new_search(request):
-    #Get search object
+    # Get search object
     search_url = request.POST.get('search_url')
-    
-    #Check is text is null or not
+
+    # Check is text is null or not
     if search_url == None:
         search_url = ''
 
-    #save searchs in the table
-    models.Search.objects.create(search = search_url)
-    #Format Query
+    # save searchs in the table
+    models.Search.objects.create(search=search_url)
+    # Format Query
     #final_url =  BASE_QUERY.format(quote_plus(Search_text))
     final_url = search_url
     print(final_url)
-    #Excute the query
+    # Excute the query
     headers = {
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
     }
     response = requests.get(final_url, verify=False, headers=headers)
-    #Reponse from query
+    # Reponse from query
     data = response.text
-    #Clean up the results using beautiful soup
+    # Clean up the results using beautiful soup
     soup = BeautifulSoup(data, features='html.parser')
     #post_lists = soup.find_all( 'li',{'class' : 'result-row'})
     #post_title = soup.find(class_ = "postingtitletext").text
-    post_full_title = soup.find(class_ = "postingtitletext").text
+    post_full_title = soup.find(class_="postingtitletext").text
     print(post_full_title)
 
-    if soup.find(class_ = "price"):
-        post_price = soup.find(class_ = "price").text
+    if soup.find(class_="price"):
+        post_price = soup.find(class_="price").text
     else:
         post_price = "N/A"
 
@@ -58,33 +58,38 @@ def new_search(request):
         for post_content in post.find_all('div', "slide"):
             for pic in post_content.find_all("img"):
                 first_img_url = pic['src']
-                #print(first_img_url)
+                # print(first_img_url)
 
     # Get all the images from the craigslist ad
     post_image = []
     for img in soup.find_all('div', id="thumbs"):
         for img_content in img.find_all("a", "thumb"):
             post_image.append(img_content['href'])
-    
+
+    annotate_results_from_api = []
+
     # Upload all the images to google cloud storage
     for image in post_image:
         print("Uploading images to google cloud storage .....")
         gcs_path = upload_blob(image)
         print("Sending request to google cloud api .....")
-        report(annotate("gs://{}/{}".format(GS_BUCKET_NAME, gcs_path)))
-    
-    search_dictionary ={
-        'search' : final_url,
+        annotate_results_from_api.append(
+            report(annotate("gs://{}/{}".format(GS_BUCKET_NAME, gcs_path))))
+
+    print(annotate_results_from_api)
+    search_dictionary = {
+        'search': final_url,
         'post_full_title': post_full_title,
         'post_price': post_price,
         'first_img_url': first_img_url,
-        'post_image' : post_image,
-        #'annotation_results' : annotation_results
+        'post_image': post_image,
+        # 'annotation_results' : annotation_results
     }
-    return render(request , 'WebScraper/results.html',search_dictionary)
+    return render(request, 'WebScraper/results.html', search_dictionary)
+
 
 def run_quickstart():
-    # [START vision_quickstart] 
+    # [START vision_quickstart]
 
     # Instantiates a client
     # [START vision_python_migration_client]
@@ -109,9 +114,11 @@ def run_quickstart():
         print(label.description)
         print(label.score)
     # [END vision_quickstart]
-#run_quickstart()
+# run_quickstart()
 
 # [START vision_web_detection_gcs]
+
+
 def detect_web_uri(uri):
     """Detects web annotations in the file located in Google Cloud Storage."""
     client = vision.ImageAnnotatorClient()
@@ -134,14 +141,14 @@ def detect_web_uri(uri):
 
             if page.full_matching_images:
                 print('\t{} Full Matches found: '.format(
-                       len(page.full_matching_images)))
+                    len(page.full_matching_images)))
 
                 for image in page.full_matching_images:
                     print('\t\tImage url  : {}'.format(image.url))
 
             if page.partial_matching_images:
                 print('\t{} Partial Matches found: '.format(
-                       len(page.partial_matching_images)))
+                    len(page.partial_matching_images)))
 
                 for image in page.partial_matching_images:
                     print('\t\tImage url  : {}'.format(image.url))
@@ -168,11 +175,12 @@ def detect_web_uri(uri):
                 response.error.message))
 # [END vision_web_detection_gcs]
 
+
 def annotate(path):
     """Returns web annotations given the path to an image."""
     # [START vision_web_detection_tutorial_annotate]
     client = vision.ImageAnnotatorClient()
-    print(path)
+
     if path.startswith('http') or path.startswith('gs:') or path.startswith('https'):
         image = types.Image()
         image.source.image_uri = path
@@ -186,15 +194,21 @@ def annotate(path):
 
     return web_detection
 
+
 def report(annotations):
     """Prints detected features in the provided web annotations."""
     # [START vision_web_detection_tutorial_print_annotations]
+    pages_with_matching_images = []
+    full_matching_images = []
+    partial_matching_images = []
+
     if annotations.pages_with_matching_images:
         print('\n{} Pages with matching images retrieved'.format(
             len(annotations.pages_with_matching_images)))
 
         for page in annotations.pages_with_matching_images:
             print('Url   : {}'.format(page.url))
+            pages_with_matching_images.append(page)
 
     if annotations.full_matching_images:
         print('\n{} Full Matches found: '.format(
@@ -202,6 +216,7 @@ def report(annotations):
 
         for image in annotations.full_matching_images:
             print('Url  : {}'.format(image.url))
+            full_matching_images.append(image)
 
     if annotations.partial_matching_images:
         print('\n{} Partial Matches found: '.format(
@@ -209,6 +224,7 @@ def report(annotations):
 
         for image in annotations.partial_matching_images:
             print('Url  : {}'.format(image.url))
+            partial_matching_images.append(image)
 
     if annotations.web_entities:
         print('\n{} Web entities found: '.format(
@@ -217,13 +233,22 @@ def report(annotations):
         for entity in annotations.web_entities:
             print('Score      : {}'.format(entity.score))
             print('Description: {}'.format(entity.description))
+
+    api_result = {
+        'pages_with_matching_images': pages_with_matching_images,
+        'full_matching_images': full_matching_images,
+        'partial_matching_images': partial_matching_images
+    }
+    return api_result
     # [END vision_web_detection_tutorial_print_annotations]
 
 # Retrieved from https://stackoverflow.com/questions/54235721/transfer-file-from-url-to-cloud-storage
-def upload_blob(source_file_name):   
+
+
+def upload_blob(source_file_name):
     file = urllib.request.urlopen(source_file_name)
-    firstpos=source_file_name.rfind("/")
-    lastpos=len(source_file_name)
+    firstpos = source_file_name.rfind("/")
+    lastpos = len(source_file_name)
     destination_blob_name = source_file_name[firstpos+1:lastpos]
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(GS_BUCKET_NAME)
