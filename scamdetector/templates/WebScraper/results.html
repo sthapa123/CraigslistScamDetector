@@ -44,176 +44,52 @@
 	</div>
 <div class="container margin_60">
 	<div class="row">
-		<aside class="col-lg-4">
-			<p>
-				<a class="btn_map" data-toggle="collapse" href="#collapseMap" aria-expanded="false" aria-controls="collapseMap" data-text-swap="Hide map" data-text-original="View on map">View on map</a>
-			</p>
-			<div id="filters_col">
-				<a data-toggle="collapse" href="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters" id="filters_col_bt"><i class="icon_set_1_icon-65"></i>Filters</a>
-				<div class="collapse show" id="collapseFilters">
-					<div class="filter_type">
-						<h6>Facility</h6>
-						<ul>
-							<li>
-								<label>
-									<input type="checkbox">Pet allowed
-								</label>
-							</li>
-							<li>
-								<label>
-									<input type="checkbox">Groups allowed
-								</label>
-							</li>
-							<li>
-								<label>
-									<input type="checkbox">Tour guides
-								</label>
-							</li>
-							<li>
-								<label>
-									<input type="checkbox">Access for disabled
-								</label>
-							</li>
-						</ul>
-					</div>
-				</div>
-				<!--End collapse -->
-			</div>
-			<!--End filters col-->
-		</aside>
-		<!--End aside -->
-
-		<div class="col-lg-8">
-
-			<div id="tools">
-				<div class="row">
-					<div class="col-md-3 col-sm-4 col-6">
-						<div class="styled-select-filters">
-							<select name="sort_price" id="sort_price">
-								<option value="" selected>Sort by price</option>
-								<option value="lower">Lowest price</option>
-								<option value="higher">Highest price</option>
-							</select>
-						</div>
-					</div>
-					<div class="col-md-3 col-sm-4 col-6">
-						<div class="styled-select-filters">
-							<select name="sort_rating" id="sort_rating">
-								<option value="" selected>Sort by ranking</option>
-								<option value="lower">Lowest ranking</option>
-								<option value="higher">Highest ranking</option>
-							</select>
-						</div>
-					</div>
-					<div class="col-md-6 col-sm-4 d-none d-sm-block text-right">
-						<a href="#" class="bt_filters"><i class="icon-th"></i></a> <a href="all_tours_list.html" class="bt_filters"><i class=" icon-list"></i></a>
-					</div>
-				</div>
-			</div>
-			<!--End tools -->
+		<div class="col-lg-12">
 			<div class="col-lg-12">
 				<table class="table table-striped options_cart">
 					<thead>
 						<tr>
-							<th colspan="3">
-								Craigslist Ad Details
+							<th colspan="2">
+								<b>Craigslist Ad Details</b>
 							</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr>
 							<td>
-								<i class="icon_set_1_icon-26"></i>
+								<b>Ad Title</b>
 							</td>
 							<td>
-								Pick up service <strong>+$34*</strong>
-							</td>
-							<td>
-								<label class="switch-light switch-ios float-right">
-									<input type="checkbox" name="option_2" id="option_2" value="">
-									<span>
-									<span>No</span>
-									<span>Yes</span>
-									</span>
-									<a></a>
-								</label>
+								{{post_full_title}}
 							</td>
 						</tr>
 						<tr>
 							<td>
-								<i class="icon_set_1_icon-15"></i>
+								<b>Price</b>
 							</td>
 							<td>
-								Welcome bottle <strong>+$24</strong>
-							</td>
-							<td>
-								<label class="switch-light switch-ios float-right">
-									<input type="checkbox" name="option_4" id="option_4" value="" checked>
-									<span>
-									<span>No</span>
-									<span>Yes</span>
-									</span>
-									<a></a>
-								</label>
+								{{post_price}}
 							</td>
 						</tr>
 						<tr>
 							<td>
-								<i class="icon_set_1_icon-59"></i>
+								<b>Description</b>
 							</td>
 							<td>
-								Coffe break <strong>+$12*</strong>
-							</td>
-							<td>
-								<label class="switch-light switch-ios float-right">
-									<input type="checkbox" name="option_5" id="option_5" value="" checked>
-									<span>
-									<span>No</span>
-									<span>Yes</span>
-									</span>
-									<a></a>
-								</label>
+								{{post_description}}
 							</td>
 						</tr>
 						<tr>
 							<td>
-								<i class="icon_set_1_icon-58"></i>
+								<b>Ad URL</b>
 							</td>
 							<td>
-								Dinner <strong>+$26*</strong>
-							</td>
-							<td>
-								<label class="switch-light switch-ios float-right">
-									<input type="checkbox" name="option_6" id="option_6" value="">
-									<span>
-									<span>No</span>
-									<span>Yes</span>
-									</span>
-									<a></a>
-								</label>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<i class="icon_set_1_icon-40"></i>
-							</td>
-							<td>
-								Bike rent <strong>+$26*</strong>
-							</td>
-							<td>
-								<label class="switch-light switch-ios float-right">
-									<input type="checkbox" name="option_7" id="option_7" value="">
-									<span>
-									<span>No</span>
-									<span>Yes</span>
-									</span>
-									<a></a>
-								</label>
+								<a href="{{search}}" target="_blank" title="{{post_full_title}}">{{search}}</a>
 							</td>
 						</tr>
 					</tbody>
 				</table>
-				<div class="add_bottom_15">Image(s) found on the Craigslist ad:
+				<div class="add_bottom_15">{{no_of_images}} image(s) found on the Craigslist ad:
 				</div>
 			</div>
 			<!-- End col-lg-8 -->

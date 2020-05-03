@@ -8,6 +8,7 @@ import os
 import argparse
 import asyncio
 import urllib.request
+from multiprocessing.dummy import Pool as ThreadPool
 # Imports the Google Cloud client library
 # [START vision_python_migration_import]
 from google.cloud import vision
@@ -48,7 +49,7 @@ def new_search(request):
     #post_title = soup.find(class_ = "postingtitletext").text
     post_full_title = soup.find(class_="postingtitletext").text
     print(post_full_title)
-
+    post_description = soup.find(id = "postingbody").text.replace("QR Code Link to This Post","")
     if soup.find(class_="price"):
         post_price = soup.find(class_="price").text
     else:
@@ -68,21 +69,38 @@ def new_search(request):
 
     annotate_results_from_api = []
 
-    # Upload all the images to google cloud storage
-    for image in post_image:
-        print("Uploading images to google cloud storage .....")
-        gcs_path = upload_blob(image)
-        print("Sending request to google cloud api .....")
-        annotate_results_from_api.append(
-            report(annotate("gs://{}/{}".format(GS_BUCKET_NAME, gcs_path))))
+    pool = ThreadPool(4)
+    results = pool.map(upload_blob, post_image)
+    pool.close()
+    pool.join()
+    print(results)
+    gs_path = []
+    for img in results:
+        gs_path.append("gs://{}/{}".format(GS_BUCKET_NAME, img))
 
-    print(annotate_results_from_api)
+    print(gs_path)
+    # Upload all the images to google cloud storage
+    # for image in post_image:
+    #     print("Uploading images to google cloud storage .....")
+    #     gcs_path = upload_blob(image)
+    #     print("Sending request to google cloud api .....")
+    #     print(gcs_path)
+    #     #annotate_results_from_api.append(
+    #         #report(annotate("gs://{}/{}".format(GS_BUCKET_NAME, gcs_path))))
+    pool = ThreadPool(4)
+    vals = pool.map(annotate, gs_path)
+    pool.close()
+    pool.join()
+    #print(annotate_results_from_api)
+    print(vals)
     search_dictionary = {
         'search': final_url,
         'post_full_title': post_full_title,
         'post_price': post_price,
         'first_img_url': first_img_url,
         'post_image': post_image,
+        'post_description': post_description,
+        'no_of_images': len(post_image)
         # 'annotation_results' : annotation_results
     }
     return render(request, 'WebScraper/results.html', search_dictionary)
@@ -189,6 +207,7 @@ def annotate(path):
             content = image_file.read()
 
         image = types.Image(content=content)
+
     web_detection = client.web_detection(image=image).web_detection
     # [END vision_web_detection_tutorial_annotate]
 
