@@ -79,23 +79,12 @@ def new_search(request):
     for img in results:
         gs_path.append("gs://{}/{}".format(GS_BUCKET_NAME, img))
 
-    # Upload all the images to google cloud storage
-    # for image in post_image:
-    #     print("Uploading images to google cloud storage .....")
-    #     gcs_path = upload_blob(image)
-    #     print("Sending request to google cloud api .....")
-    #     print(gcs_path)
-    #     #annotate_results_from_api.append(
-    #         #report(annotate("gs://{}/{}".format(GS_BUCKET_NAME, gcs_path))))
-    
     pool = ThreadPool(8)
     images_match = pool.starmap(annotate, zip(gs_path, post_image))
     start_time = time.time()
     pool.close()
     pool.join()
     print('M2 Time taken: {}'.format(time.time() - start_time))
-    #print(post_image)
-    #print(annotate_results_from_api)
     print(images_match)
 
     search_dictionary = {
@@ -196,7 +185,6 @@ def detect_web_uri(uri):
                 response.error.message))
 # [END vision_web_detection_gcs]
 
-
 def annotate(path, web_path):
     """Returns web annotations given the path to an image."""
     # [START vision_web_detection_tutorial_annotate]
@@ -241,12 +229,6 @@ def annotate(path, web_path):
             partial_matching_images[counter] = image
             counter +=1
 
-    #print(pages_with_matching_images)
-    # print(full_matching_images)
-   # print("legth ", len(full_matching_images))
-    #print(partial_matching_images)
-    # print(partial_matching_images)
-    # print(full_matching_images)
     return full_matching_images
 
 def report(annotations):
@@ -297,7 +279,6 @@ def report(annotations):
     # [END vision_web_detection_tutorial_print_annotations]
 
 # Retrieved from https://stackoverflow.com/questions/54235721/transfer-file-from-url-to-cloud-storage
-
 
 def upload_blob(source_file_name):
     file = urllib.request.urlopen(source_file_name)
