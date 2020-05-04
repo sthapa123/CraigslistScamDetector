@@ -216,7 +216,10 @@
     <script src="{% static "assets/js/functions.js" %}"></script>
 
     <!-- Date picker -->
-    <script>$('input.date-pick').datepicker();</script>
+    <script>
+    $('input.date-pick').datepicker(); 
+    $('.danger1').prepend($('<div class="alert alert-danger"> Match(es) found for the image. It is more likely to be a scam. </div>'));
+    </script>
 
 </body>
 

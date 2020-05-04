@@ -93,7 +93,7 @@
 				</div>
 			</div>
 			<!-- End col-lg-8 -->
-			<div class="row magnific-gallery">
+			<div class="row gallery">
 				{% for item in images_match %}
 					{% for key,value in item.items %}				
 				<div class="col-sm-3 wow" data-wow-delay="0.1s">
@@ -111,7 +111,14 @@
 						</div>
 						<div class="tour_title">
 							{% for link_key, link_value in value.items %}
-							<a href="{{link_value}}" targe="_blank">Link : {{link_key}}</a><br />
+								<div class="danger{{link_key}}" role="alert">
+									<a href="{{link_value}}" target="_blank">{{ link_value|slice:"0:30" }}....</a><br />
+								</div>
+								{% empty %}
+								<div class="alert alert-success" role="alert">
+									No match for this image found. It is less likely to be a scam.
+								</div>
+								
 							{% endfor %}
 							<!-- <div class="rating">
 								<i class="icon-smile voted"></i><i class="icon-smile voted"></i><i class="icon-smile voted"></i><i class="icon-smile voted"></i><i class="icon-smile"></i><small>(75)</small>
