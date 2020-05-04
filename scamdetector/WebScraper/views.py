@@ -4,13 +4,6 @@ import requests
 from requests.compat import quote_plus
 from . import models
 import io
-<<<<<<< HEAD
-
-BASE_QUERY = 'https://minneapolis.craigslist.org/search/sss?query={}&sort=rel'
-min_price_query = '&min_price={}'
-max_price_query = '&max_price={}'
-Image_URL = 'https://images.craigslist.org/{}_300x300.jpg'
-=======
 import os
 import argparse
 import asyncio
@@ -26,7 +19,6 @@ from google.cloud import storage
 
 GS_BUCKET_NAME = "craigslist-images-bucket"
 
->>>>>>> integration
 # Create your views here.
 def home(request):
     return render(request, 'WebScraper/index.html')
@@ -116,9 +108,6 @@ def new_search(request):
         'no_of_images': len(post_image),
         'images_match': images_match
     }
-<<<<<<< HEAD
-    return render(request , 'WebScraper/new_search.html',search_dictionary)
-=======
     return render(request, 'WebScraper/results.html', search_dictionary)
 
 def run_quickstart():
@@ -321,4 +310,3 @@ def upload_blob(source_file_name):
 
     blob.upload_from_string(file.read(), content_type='image/jpg')
     return destination_blob_name
->>>>>>> integration
