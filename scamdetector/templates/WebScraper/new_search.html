@@ -1,14 +1,15 @@
 {% extends 'base.html'%}
 {% block content%}
 {% load static %}
-    <h4 style= "text-align: center;">You Searched For:{{search|title}}</h4> 
-    <h4 style= "text-align: center;">Found {{numberofsearches}} listings</h4> 
+    <h4 style= "text-align: center;">Post Title: {{post_full_title}}</h4> 
+    <h4 style= "text-align: center;">Price:  {{post_price}}</h4> 
+    <a href= "#"><img src={{first_img_url}} alt=""></a>
     <div class= "row">
     {% for post in final_posts %}
         <div class="col s4">
             <div class="card">
                 <div class="card-image">
-                    <a href= {{post.1}}><img src={{post.3}} alt=""></a>
+                    <a href= {{post.1}}><img src={{first_img_url} alt=""></a>
                 </div>
                 <div class="card-content">
                     <p>{{post.0}}</p>

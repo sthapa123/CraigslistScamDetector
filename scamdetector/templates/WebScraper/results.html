@@ -1,0 +1,143 @@
+{% extends 'base.html'%}
+{% block content%}
+{% load static %}
+<div id="search_container_2" style="height: 0;">
+    <div id="search_2">
+        <div class="app_title">
+        <h3>Craigslist Scam Detection</h3>
+        <p class="animated fadeInDown">Detect scam ads on Craigslist</p>
+    </div>
+        <div class="tab-content">
+            <div class="tab-pane fade active show">
+               <form action="{% url 'new_search' %}" method="POST" >
+                {%csrf_token%}
+                    <div class="row no-gutters custom-search-input-2">
+                        <div class="col-lg-10">
+                            <div class="form-group">
+                                <input class="form-control" type="text" placeholder="Put your Craigslist ad URL here..." id="autocomplete" name="search_url" required>
+                                <i class="icon_link"></i>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="submit" class="btn_search" value="Search">
+                        </div>
+                    </div>
+                    <!-- /row -->
+                </form>
+            </div>
+            <!-- End tab -->
+        </div>
+    </div>
+    <!-- End search_container_2 -->
+</div>
+<!-- End search_container -->
+<main>
+<div class="white_bg">
+	<div id="position">
+		<div class="container">
+			<ul>
+				<li><a href="#">Home</a>
+				</li>
+				<li>Search Results</li>
+			</ul>
+		</div>
+	</div>
+<div class="container margin_60">
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="col-lg-12">
+				<table class="table table-striped options_cart">
+					<thead>
+						<tr>
+							<th colspan="2">
+								<b>Craigslist Ad Details</b>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<b>Ad Title</b>
+							</td>
+							<td>
+								{{post_full_title}}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Price</b>
+							</td>
+							<td>
+								{{post_price}}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Description</b>
+							</td>
+							<td>
+								{{post_description}}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Ad URL</b>
+							</td>
+							<td>
+								<a href="{{search}}" target="_blank" title="{{post_full_title}}">{{search}}</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="add_bottom_15">{{no_of_images}} image(s) found on the Craigslist ad:
+				</div>
+			</div>
+			<!-- End col-lg-8 -->
+			<div class="row gallery">
+				{% for item in images_match %}
+					{% for key,value in item.items %}				
+				<div class="col-sm-3 wow" data-wow-delay="0.1s">
+					<div class="tour_container">
+						<!-- <div class="ribbon_3"><span>Less Likely Scam</span>
+						</div> -->
+						<div class="img_container_gallery zoomIn">
+							<a href="{{key}}" data-effect="mfp-zoom-in">
+								<img src="{{key}}" width="450" height="600" class="img-fluid" alt="Image">
+								<i class="icon-resize-full-2"></i>
+								<!-- <div class="short_info">
+									<i class="icon_set_1_icon-44"></i>Historic Buildings<span class="price"><sup>{{post_price}}</sup></span>
+								</div> -->
+							</a>
+						</div>
+						<div class="tour_title">
+							{% for link_key, link_value in value.items %}
+								<div class="danger{{link_key}}" role="alert">
+									<a href="{{link_value}}" target="_blank">{{ link_value|slice:"0:30" }}....</a><br />
+								</div>
+								{% empty %}
+								<div class="alert alert-success" role="alert">
+									No match for this image found. It is less likely to be a scam.
+								</div>
+								
+							{% endfor %}
+							<!-- <div class="rating">
+								<i class="icon-smile voted"></i><i class="icon-smile voted"></i><i class="icon-smile voted"></i><i class="icon-smile voted"></i><i class="icon-smile"></i><small>(75)</small>
+							</div> -->
+						</div>
+					</div>
+					<!-- End box tour -->
+				</div>
+				<!-- End col-md-6 -->
+					{% endfor %}
+				{% endfor %}
+			</div>
+			<!-- End row -->
+		</div>
+		<!-- End col lg 9 -->
+	</div>
+	<!-- End row -->
+</div>
+<!-- End container -->
+</div>
+</main>
+{% endblock %}
